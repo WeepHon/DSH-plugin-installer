@@ -1,0 +1,53 @@
+name: build
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 生成图标
+        shell: powershell
+        run: powershell -ExecutionPolicy Bypass -File build\make-icon.ps1
+
+      - name: 编译单文件 exe
+        shell: powershell
+        run: powershell -ExecutionPolicy Bypass -File build\build-exe.ps1
+
+      - name: 语法检查（PowerShell 解析）
+        shell: powershell
+        run: |
+          $files = @(
+            'DSH-Plugin-Installer.ps1',
+            'cli-mode.ps1',
+            'core\dsh-plugin-core.ps1',
+            'core\dsh-unlock-core.ps1',
+            'core\dsh-unlock-dir.ps1',
+            'core\dsh-fallback-core.ps1'
+          )
+          $bad = 0
+          foreach ($f in $files) {
+            $errs = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile((Join-Path (Get-Location) $f), [ref]$null, [ref]$errs)
+            if ($errs -and $errs.Count -gt 0) {
+              $bad = 1
+              Write-Host "解析失败：$f"
+              $errs | ForEach-Object { Write-Host ("  " + $_.Message) }
+            }
+          }
+          if ($bad -ne 0) { exit 1 }
+          Write-Host '全部脚本解析通过'
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: DSH-Plugin-Installer-exe
+          path: dist/DSH插件安装器.exe
+          if-no-files-found: error
