@@ -1,0 +1,32 @@
+这个文件夹是「投放区」。
+
+把插件文件夹（或插件 .zip 压缩包）直接拖到这里，安装器打开时就会自动列出来，不需要再去点「选择文件夹」。
+
+什么才算一个 DSH 插件？
+--------------------------------------------------
+打开插件文件夹，里面应该能直接看到一个 package.json，内容大致是：
+
+  {
+    "name": "dsh-xxx",          ← 插件名
+    "version": "1.2.3",
+    "engines": { "dsh": ">=0.2.0-rc.2" },
+    "dsh": { "bundle": { "patch": "cordis.patch.yml" } },
+    "main": "src/node.js"
+  }
+
+常见形态：
+  dsh-unrestricted-0.2.4\        ← 整个文件夹放进来即可
+      package.json
+      src\node.js
+      cordis.patch.yml
+
+  some-plugin.zip                ← 压缩包也可以，安装器会自己解压
+
+如果拖进来的是「外层文件夹」，比如 xxx-main\ 里面还套着一层 xxx-main\，
+安装器也会自己往下找 package.json，不用手动改。
+
+注意：
+  · 不要只放 .js 文件，那不是一个插件包。
+  · 不要把 node_modules 一起拷进来（安装器复制时会自动跳过）。
+  · 装好之后，这个文件夹里的东西就可以删了 —— 安装器已经把它复制到
+    %USERPROFILE%\.dsh\local-plugins\<插件名>-<版本> 了。

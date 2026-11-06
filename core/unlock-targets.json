@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "comment": "官方更新后如果补丁失效，先看这里：把新的函数名/文件路径补进对应数组即可，不用改代码。find 里是正则。",
+
+  "moduleSearch": [
+    "dsh/node_modules/@deepseek-ai/dsh-app-boot/lib/index.js",
+    "dsh/node_modules/@deepseek-ai/dsh-app-boot/lib/index.mjs",
+    "dsh/node_modules/@deepseek-ai/dsh-app-boot/lib/index.cjs"
+  ],
+
+  "moduleContentFallbacks": [
+    "function\\s+evaluatePluginCompatibility\\s*\\(",
+    "pluginCompatibilityWarning",
+    "peerDependencies.*@deepseek-ai/dsh"
+  ],
+
+  "patches": [
+    {
+      "id": "compat-gate",
+      "title": "插件版本兼容性检查",
+      "find": "function\\s+evaluatePluginCompatibility\\s*\\(",
+      "insert": "return void 0;",
+      "note": "返回 undefined 表示兼容，deny 分支永远走不到"
+    },
+    {
+      "id": "compat-warning",
+      "title": "不兼容提示（pluginCompatibilityWarning）",
+      "find": "function\\s+pluginCompatibilityWarning\\s*\\(",
+      "insert": "return void 0;",
+      "note": "deny 拿到 undefined 就不会停用插件"
+    },
+    {
+      "id": "signature",
+      "title": "插件签名校验",
+      "find": "function\\s+(?:verify|check)(?:Plugin|Bundle)?Signature\\s*\\(",
+      "insert": "return true;",
+      "note": "签名校验恒真（官方哪天真的加了验签，会自动改打这个）"
+    }
+  ],
+
+  "signatureWatch": "verifyPluginSignature|verifyBundleSignature|TRUSTED_PUBLIC_KEY|trustedPublicKey|bundleSignature",
+
+  "hostileManifest": {
+    "name": "dsh-installer-probe",
+    "version": "1.0.0",
+    "peerDependencies": { "@deepseek-ai/dsh": ">=99.0.0" }
+  }
+}
