@@ -1,0 +1,19 @@
+# 构建产物
+dist/
+build/stage/
+build/Program.gen.cs
+_run_*/
+*.exe
+
+# 运行时落点
+logs/
+*.log
+dsh-installer-error.log
+
+# 编辑器
+.vs/
+.vscode/
+*.user
+*.suo
+Thumbs.db
+desktop.ini
